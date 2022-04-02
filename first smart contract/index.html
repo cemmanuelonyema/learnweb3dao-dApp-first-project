@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>My First dApp</title>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>Hello world!!</h1>
+      <h3>This is my first dApp!</h3>
+      <p>Here I can set or get my mood:</p>
+      <form>
+        <input type="text" id="mood" placeholder="Input mood" />
+      </form>
+      <button onclick="setMood()" class="setmood">Set Mood</button>
+      <button onclick="getMood()" class="getmood">Get Mood</button>
+    </div>
+
+    <script
+      src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"
+      type="application/javascript"
+    ></script>
+    <script>
+      const MoodContractAddress = "0xA921150a484C25F4067E1fFb136D96B9c26EC754";
+      const MoodContractABI = [
+        {
+          constant: false,
+          inputs: [
+            {
+              internalType: "string",
+              name: "_mood",
+              type: "string",
+            },
+          ],
+          name: "setMood",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+          payable: false,
+        },
+        {
+          constant: true,
+          inputs: [],
+          name: "getMood",
+          outputs: [
+            {
+              internalType: "string",
+              name: "",
+              type: "string",
+            },
+          ],
+          payable: false,
+          stateMutability: "view",
+          type: "function",
+        },
+      ];
+      // ether provider
+      const provider = new ethers.providers.Web3Provider(
+        window.ethereum,
+        "ropsten"
+      );
+      //   Request access to the user's wallet and connect the signer to your metamask account (we use [0] as the default), and define the contract object using your contract address, ABI, and signer
+      provider.send("eth_requestAccounts", []).then(() => {
+        provider.listAccounts().then((accounts) => {
+          signer = provider.getSigner(accounts[0]);
+          MoodContract = new ethers.Contract(
+            MoodContractAddress,
+            MoodContractABI,
+            signer
+          );
+        });
+      });
+      //   Create asynchronous functions to call your smart contract functions
+      async function getMood() {
+        const getMoodPromise = MoodContract.getMood();
+        const Mood = await getMoodPromise;
+        console.log(Mood);
+      }
+
+      async function setMood() {
+        const mood = document.getElementById("mood").value;
+        const setMoodPromise = MoodContract.setMood(mood);
+        await setMoodPromise;
+      }
+
+      let MoodContract;
+      let signer;
+    </script>
+  </body>
+</html>
